@@ -5,7 +5,7 @@ third-party APIs: a live currency-conversion service and Razorpay's hosted
 checkout in test mode. It's a portfolio piece built to demonstrate clean
 third-party API integration — not a production storefront.
 
-**Live demo:** http://quick-quote.runasp.net
+**Live demo:** https://quick-quote.runasp.net
 
 ## What it does
 
