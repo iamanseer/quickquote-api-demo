@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Stripe.net" Version="52.1.1" />
+    <PackageReference Include="Razorpay" Version="3.3.2" />
   </ItemGroup>
 
 </Project>

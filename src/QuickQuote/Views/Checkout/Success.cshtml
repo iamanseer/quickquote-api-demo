@@ -21,9 +21,9 @@
                 <div>
                     <dt>Amount charged</dt>
                     <dd>
-                        @if (Model.Payment.AmountTotalCents is { } cents)
+                        @if (Model.Payment.AmountTotalMinorUnits is { } minorUnits)
                         {
-                            @((cents / 100m).ToString("N2")) @(Model.Payment.Currency?.ToUpperInvariant())
+                            @((minorUnits / 100m).ToString("N2")) @(Model.Payment.Currency?.ToUpperInvariant())
                         }
                         else
                         {
@@ -45,7 +45,7 @@
             </dl>
 
             <p class="confirmation__footnote">
-                This was a Stripe <strong>test-mode</strong> transaction — no real money moved and no card was charged.
+                This was a Razorpay <strong>test-mode</strong> transaction — no real money moved and no card was charged.
             </p>
         </div>
     }
@@ -54,7 +54,7 @@
         <div class="card confirmation__card confirmation__card--error">
             <span class="confirmation__icon confirmation__icon--error">!</span>
             <h1>We couldn't confirm this payment</h1>
-            <p class="confirmation__sub">@(Model.Payment.ErrorMessage ?? "Stripe didn't report a successful payment for this session.")</p>
+            <p class="confirmation__sub">@(Model.Payment.ErrorMessage ?? "Razorpay didn't report a successful payment.")</p>
         </div>
     }
 

@@ -37,7 +37,7 @@
                 {
                     <div class="alert alert--warning">
                         <strong>Currency conversion unavailable.</strong>
-                        <span>@Model.ExchangeRates.ErrorMessage You're still fully protected — pricing and payment continue in USD.</span>
+                        <span>@Model.ExchangeRates.ErrorMessage Pricing above stays in USD; a fresh rate is fetched again when you pay.</span>
                     </div>
                 }
             </div>
@@ -45,11 +45,12 @@
 
         <div class="card checkout__pay">
             <p class="eyebrow">Payment</p>
-            <h2>Pay securely with Stripe</h2>
+            <h2>Pay securely with Razorpay</h2>
             <p class="checkout__microcopy">
-                You'll be redirected to Stripe's own hosted checkout page — QuickQuote never
-                sees or stores your card details. This demo runs in Stripe <strong>test mode</strong>,
-                so no real charge is made.
+                You'll be redirected to Razorpay's own hosted payment page — QuickQuote never
+                sees or stores your card or UPI details. Razorpay settles in INR, so you're
+                charged the live-converted rupee price shown above, not a fixed number. This
+                demo runs in Razorpay <strong>test mode</strong>, so no real charge is made.
             </p>
 
             @if (!string.IsNullOrEmpty(Model.PaymentError))
@@ -60,25 +61,17 @@
                 </div>
             }
 
-            @if (Model.PaymentCancelled)
-            {
-                <div class="alert alert--info">
-                    <strong>Checkout cancelled.</strong>
-                    <span>No charge was made. You can try again whenever you're ready.</span>
-                </div>
-            }
-
             <form method="post" asp-controller="Checkout" asp-action="Pay" asp-route-productId="@Model.Product.Id">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn--primary btn--block">
-                    Pay $@Model.Product.PriceUsd.ToString("0.00") with Stripe
+                    Pay $@Model.Product.PriceUsd.ToString("0.00") with Razorpay
                 </button>
             </form>
 
             <ul class="trust-list">
-                <li>256-bit encrypted checkout, hosted by Stripe</li>
-                <li>Use test card 4242 4242 4242 4242, any future date, any CVC</li>
-                <li>Cancel anytime before you confirm — you won't be charged</li>
+                <li>256-bit encrypted checkout, hosted by Razorpay</li>
+                <li>Test card 4111 1111 1111 1111, any future date, any CVV</li>
+                <li>Or test UPI ID: success@razorpay</li>
             </ul>
         </div>
     </div>

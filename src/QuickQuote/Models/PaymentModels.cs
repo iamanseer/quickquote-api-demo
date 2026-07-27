@@ -4,9 +4,8 @@ public record PaymentSessionRequest(
     string ProductId,
     string ProductName,
     string ProductDescription,
-    decimal AmountUsd,
-    string SuccessUrl,
-    string CancelUrl);
+    decimal AmountInr,
+    string CallbackUrl);
 
 public class PaymentSessionResult
 {
@@ -21,6 +20,6 @@ public class PaymentConfirmation
     public string? ErrorMessage { get; init; }
     public string? CustomerEmail { get; init; }
     public string? PaymentStatus { get; init; }
-    public long? AmountTotalCents { get; init; }
+    public long? AmountTotalMinorUnits { get; init; }
     public string? Currency { get; init; }
 }

@@ -13,8 +13,8 @@ builder.Services.AddHttpClient<IExchangeRateService, FrankfurterExchangeRateServ
     client.Timeout = TimeSpan.FromSeconds(6);
 });
 
-builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection(StripeOptions.SectionName));
-builder.Services.AddScoped<IPaymentService, StripePaymentService>();
+builder.Services.Configure<RazorpayOptions>(builder.Configuration.GetSection(RazorpayOptions.SectionName));
+builder.Services.AddScoped<IPaymentService, RazorpayPaymentService>();
 
 var app = builder.Build();
 

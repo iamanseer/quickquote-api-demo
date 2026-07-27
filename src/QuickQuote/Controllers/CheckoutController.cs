@@ -26,7 +26,7 @@ public class CheckoutController : Controller
     }
 
     [HttpGet("Checkout/{productId}")]
-    public async Task<IActionResult> Index(string productId, bool cancelled, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(string productId, CancellationToken cancellationToken)
     {
         var product = _catalog.GetById(productId);
         if (product is null)
@@ -41,7 +41,6 @@ public class CheckoutController : Controller
             Product = product,
             ExchangeRates = rates,
             PaymentError = TempData["PaymentError"] as string,
-            PaymentCancelled = cancelled,
         };
 
         return View(viewModel);
@@ -57,20 +56,31 @@ public class CheckoutController : Controller
             return NotFound();
         }
 
+        // Razorpay settles in INR, so the amount actually charged is the live-converted
+        // INR price, not a fixed number — the FX integration isn't just decorative here.
+        var inrRate = await _exchangeRates.ConvertAsync(product.PriceUsd, new[] { "INR" }, cancellationToken);
+        var inrQuote = inrRate.Quotes.FirstOrDefault(q => q.Currency == "INR");
+
+        if (!inrRate.Success || inrQuote is null)
+        {
+            _logger.LogWarning("Could not resolve a live INR price for product {ProductId}: {Error}", productId, inrRate.ErrorMessage);
+            TempData["PaymentError"] = "We couldn't fetch a live price to charge right now. Please try again in a moment.";
+            return RedirectToAction(nameof(Index), new { productId });
+        }
+
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
         var request = new PaymentSessionRequest(
             ProductId: product.Id,
             ProductName: product.Name,
             ProductDescription: product.Description,
-            AmountUsd: product.PriceUsd,
-            SuccessUrl: $"{baseUrl}/Checkout/Success?session_id={{CHECKOUT_SESSION_ID}}&productId={product.Id}",
-            CancelUrl: $"{baseUrl}/Checkout/{product.Id}?cancelled=true");
+            AmountInr: inrQuote.ConvertedAmount,
+            CallbackUrl: $"{baseUrl}/Checkout/Success?productId={product.Id}");
 
         var result = await _payments.CreateCheckoutSessionAsync(request, cancellationToken);
 
         if (!result.Success || string.IsNullOrEmpty(result.CheckoutUrl))
         {
-            _logger.LogWarning("Stripe checkout session could not be created for product {ProductId}: {Error}", productId, result.ErrorMessage);
+            _logger.LogWarning("Razorpay payment link could not be created for product {ProductId}: {Error}", productId, result.ErrorMessage);
             TempData["PaymentError"] = result.ErrorMessage ?? "Something went wrong starting the test payment. Please try again.";
             return RedirectToAction(nameof(Index), new { productId });
         }
@@ -79,15 +89,19 @@ public class CheckoutController : Controller
     }
 
     [HttpGet("Checkout/Success")]
-    public async Task<IActionResult> Success(string session_id, string productId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Success(string productId, CancellationToken cancellationToken)
     {
         var product = _catalog.GetById(productId);
-        if (product is null || string.IsNullOrWhiteSpace(session_id))
+        if (product is null)
         {
             return NotFound();
         }
 
-        var confirmation = await _payments.GetConfirmationAsync(session_id, cancellationToken);
+        var callbackParameters = Request.Query
+            .Where(q => q.Key != "productId")
+            .ToDictionary(q => q.Key, q => q.Value.ToString());
+
+        var confirmation = await _payments.ConfirmAsync(callbackParameters, cancellationToken);
 
         return View(new ConfirmationViewModel { Product = product, Payment = confirmation });
     }

@@ -5,7 +5,6 @@ public class CheckoutViewModel
     public required Product Product { get; init; }
     public required ExchangeRateResult ExchangeRates { get; init; }
     public string? PaymentError { get; init; }
-    public bool PaymentCancelled { get; init; }
 }
 
 public class ConfirmationViewModel
