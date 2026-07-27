@@ -1,0 +1,21 @@
+## .NET
+bin/
+obj/
+publish/
+*.user
+*.suo
+.vs/
+.vscode/
+
+## macOS
+.DS_Store
+
+## Secrets — never commit real keys. Use `dotnet user-secrets` locally
+## and host environment variables in production. appsettings.Example.json
+## is the checked-in template; appsettings.json only ever holds empty
+## placeholders in this repo.
+appsettings.Development.json
+appsettings.Production.json
+*.pfx
+.env
+.env.local

@@ -1,8 +1,34 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model IReadOnlyList<Product>
+@{
+    ViewData["Title"] = "Plans";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@await Html.PartialAsync("_StepIndicator", 1)
+
+<section class="shell hero">
+    <p class="eyebrow">QuickQuote plans</p>
+    <h1>Pick a plan, pay in seconds.</h1>
+    <p class="hero__sub">
+        Every plan below is priced in USD and converted to live foreign-exchange rates
+        the moment you reach checkout. Payment runs through Stripe's test network, so
+        you can walk the full flow without ever touching a real card.
+    </p>
+</section>
+
+<section class="shell plan-grid">
+    @foreach (var product in Model)
+    {
+        <article class="card plan-card">
+            <span class="plan-card__badge">@product.BadgeLabel</span>
+            <h2 class="plan-card__name">@product.Name</h2>
+            <p class="plan-card__price">
+                <span class="plan-card__amount">$@product.PriceUsd.ToString("0.00")</span>
+                <span class="plan-card__unit">USD</span>
+            </p>
+            <p class="plan-card__desc">@product.Description</p>
+            <a class="btn btn--primary plan-card__cta" asp-controller="Checkout" asp-action="Index" asp-route-productId="@product.Id">
+                Continue to checkout
+            </a>
+        </article>
+    }
+</section>

@@ -1,0 +1,85 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = $"Checkout · {Model.Product.Name}";
+}
+
+@await Html.PartialAsync("_StepIndicator", 2)
+
+<section class="shell checkout">
+    <div class="checkout__grid">
+        <div class="card checkout__summary">
+            <p class="eyebrow">Order summary</p>
+            <h1 class="checkout__product-name">@Model.Product.Name</h1>
+            <p class="checkout__product-desc">@Model.Product.Description</p>
+
+            <div class="checkout__price-row">
+                <span>Due today</span>
+                <span class="checkout__price">$@Model.Product.PriceUsd.ToString("0.00") <small>USD</small></span>
+            </div>
+
+            <div class="fx-panel">
+                <p class="fx-panel__title">Live conversion</p>
+
+                @if (Model.ExchangeRates.Success)
+                {
+                    <ul class="fx-panel__list">
+                        @foreach (var quote in Model.ExchangeRates.Quotes)
+                        {
+                            <li>
+                                <span class="fx-panel__currency">@quote.Currency</span>
+                                <span class="fx-panel__amount">@quote.ConvertedAmount.ToString("N2")</span>
+                            </li>
+                        }
+                    </ul>
+                    <p class="fx-panel__note">Rates from Frankfurter (European Central Bank reference rates), fetched live for this page.</p>
+                }
+                else
+                {
+                    <div class="alert alert--warning">
+                        <strong>Currency conversion unavailable.</strong>
+                        <span>@Model.ExchangeRates.ErrorMessage You're still fully protected — pricing and payment continue in USD.</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card checkout__pay">
+            <p class="eyebrow">Payment</p>
+            <h2>Pay securely with Stripe</h2>
+            <p class="checkout__microcopy">
+                You'll be redirected to Stripe's own hosted checkout page — QuickQuote never
+                sees or stores your card details. This demo runs in Stripe <strong>test mode</strong>,
+                so no real charge is made.
+            </p>
+
+            @if (!string.IsNullOrEmpty(Model.PaymentError))
+            {
+                <div class="alert alert--error">
+                    <strong>Payment couldn't start.</strong>
+                    <span>@Model.PaymentError</span>
+                </div>
+            }
+
+            @if (Model.PaymentCancelled)
+            {
+                <div class="alert alert--info">
+                    <strong>Checkout cancelled.</strong>
+                    <span>No charge was made. You can try again whenever you're ready.</span>
+                </div>
+            }
+
+            <form method="post" asp-controller="Checkout" asp-action="Pay" asp-route-productId="@Model.Product.Id">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn--primary btn--block">
+                    Pay $@Model.Product.PriceUsd.ToString("0.00") with Stripe
+                </button>
+            </form>
+
+            <ul class="trust-list">
+                <li>256-bit encrypted checkout, hosted by Stripe</li>
+                <li>Use test card 4242 4242 4242 4242, any future date, any CVC</li>
+                <li>Cancel anytime before you confirm — you won't be charged</li>
+            </ul>
+        </div>
+    </div>
+</section>

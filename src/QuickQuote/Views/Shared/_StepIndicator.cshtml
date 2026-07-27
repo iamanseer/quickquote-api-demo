@@ -1,0 +1,16 @@
+@* Model: int — the 1-based index of the current step (1 = Choose plan, 2 = Review & pay, 3 = Confirmation) *@
+@model int
+@{
+    var steps = new[] { "Choose plan", "Review & pay", "Confirmation" };
+}
+<ol class="steps shell" aria-label="Checkout progress">
+    @for (var i = 0; i < steps.Length; i++)
+    {
+        var stepNumber = i + 1;
+        var state = stepNumber < Model ? "steps__item--done" : stepNumber == Model ? "steps__item--current" : "steps__item--upcoming";
+        <li class="steps__item @state">
+            <span class="steps__dot">@(stepNumber < Model ? "✓" : stepNumber.ToString())</span>
+            <span class="steps__label">@steps[i]</span>
+        </li>
+    }
+</ol>

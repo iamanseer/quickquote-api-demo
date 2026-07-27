@@ -1,7 +1,20 @@
+using QuickQuote.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSingleton<IProductCatalog, InMemoryProductCatalog>();
+
+builder.Services.AddHttpClient<IExchangeRateService, FrankfurterExchangeRateService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.frankfurter.dev/v1/");
+    client.Timeout = TimeSpan.FromSeconds(6);
+});
+
+builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection(StripeOptions.SectionName));
+builder.Services.AddScoped<IPaymentService, StripePaymentService>();
 
 var app = builder.Build();
 

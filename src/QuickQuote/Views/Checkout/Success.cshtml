@@ -1,0 +1,62 @@
+@model ConfirmationViewModel
+@{
+    ViewData["Title"] = "Order confirmed";
+}
+
+@await Html.PartialAsync("_StepIndicator", 3)
+
+<section class="shell confirmation">
+    @if (Model.Payment.Success)
+    {
+        <div class="card confirmation__card confirmation__card--success">
+            <span class="confirmation__icon">✓</span>
+            <h1>Payment confirmed</h1>
+            <p class="confirmation__sub">Thanks — your test payment for <strong>@Model.Product.Name</strong> went through.</p>
+
+            <dl class="confirmation__details">
+                <div>
+                    <dt>Plan</dt>
+                    <dd>@Model.Product.Name</dd>
+                </div>
+                <div>
+                    <dt>Amount charged</dt>
+                    <dd>
+                        @if (Model.Payment.AmountTotalCents is { } cents)
+                        {
+                            @((cents / 100m).ToString("N2")) @(Model.Payment.Currency?.ToUpperInvariant())
+                        }
+                        else
+                        {
+                            @Model.Product.PriceUsd.ToString("N2") <text>USD</text>
+                        }
+                    </dd>
+                </div>
+                <div>
+                    <dt>Status</dt>
+                    <dd class="confirmation__status">@Model.Payment.PaymentStatus</dd>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Payment.CustomerEmail))
+                {
+                    <div>
+                        <dt>Receipt sent to</dt>
+                        <dd>@Model.Payment.CustomerEmail</dd>
+                    </div>
+                }
+            </dl>
+
+            <p class="confirmation__footnote">
+                This was a Stripe <strong>test-mode</strong> transaction — no real money moved and no card was charged.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="card confirmation__card confirmation__card--error">
+            <span class="confirmation__icon confirmation__icon--error">!</span>
+            <h1>We couldn't confirm this payment</h1>
+            <p class="confirmation__sub">@(Model.Payment.ErrorMessage ?? "Stripe didn't report a successful payment for this session.")</p>
+        </div>
+    }
+
+    <a class="btn btn--ghost" asp-controller="Home" asp-action="Index">Back to plans</a>
+</section>
